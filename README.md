@@ -2,7 +2,7 @@
 ### Achievements
 ### Design Patterns
 ### Dialogue Manager
-### Enemy AI
+### Basic Enemy AI
 ### Grid System
 ### Inventory
 ### Language Manager
