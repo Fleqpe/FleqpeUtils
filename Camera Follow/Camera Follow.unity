@@ -342,4 +342,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 275913407}
-  damping: 0.5
+  damping: 0.1
