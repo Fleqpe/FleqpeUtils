@@ -10,7 +10,8 @@ public class MultiImageButtonEditor : Editor
     private ReorderableList _list;
     private void OnEnable()
     {
-        _property = serializedObject.FindProperty("targetGraphics");
+        SerializedObject button = new SerializedObject(target);
+        _property = button.FindProperty("targetGraphics");
         _list = new ReorderableList(serializedObject, _property, true, true, true, true)
         {
             drawHeaderCallback = DrawListHeader,
