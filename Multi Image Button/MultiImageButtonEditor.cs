@@ -4,14 +4,13 @@ using UnityEditor;
 using UnityEditorInternal;
 
 [CustomEditor(typeof(MultiImageButton))]
-public class MultiImageButtonEditor : Editor
+public class MultiImageserializedObjectEditor : Editor
 {
     private SerializedProperty _property;
     private ReorderableList _list;
     private void OnEnable()
     {
-        SerializedObject button = new SerializedObject(target);
-        _property = button.FindProperty("targetGraphics");
+        _property = serializedObject.FindProperty("targetGraphics");
         _list = new ReorderableList(serializedObject, _property, true, true, true, true)
         {
             drawHeaderCallback = DrawListHeader,
@@ -29,15 +28,14 @@ public class MultiImageButtonEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        SerializedObject button = new SerializedObject(target);
-        button.Update();
+        serializedObject.Update();
         _list.DoLayoutList();
-        SerializedProperty interactable = button.FindProperty("m_Interactable");
-        SerializedProperty onClick = button.FindProperty("m_OnClick");
-        SerializedProperty colors = button.FindProperty("m_Colors");
+        SerializedProperty interactable = serializedObject.FindProperty("m_Interactable");
+        SerializedProperty onClick = serializedObject.FindProperty("m_OnClick");
+        SerializedProperty colors = serializedObject.FindProperty("m_Colors");
         EditorGUILayout.PropertyField(interactable, true);
         EditorGUILayout.PropertyField(colors, true);
         EditorGUILayout.PropertyField(onClick, true);
-        button.ApplyModifiedProperties();
+        serializedObject.ApplyModifiedProperties();
     }
 }
