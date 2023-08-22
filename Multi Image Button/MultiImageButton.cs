@@ -4,7 +4,11 @@ using UnityEngine.UI;
 public class MultiImageButton : Button
 {
     [SerializeField] List<Graphic> targetGraphics = new List<Graphic>();
-
+    protected override void Awake()
+    {
+        base.Awake();
+        transition = Transition.ColorTint;
+    }
     protected override void DoStateTransition(SelectionState state, bool instant)
     {
         if (targetGraphics.Count == 0 || targetGraphics.Exists(x => x == null))
