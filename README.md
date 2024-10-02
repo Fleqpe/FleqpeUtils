@@ -7,7 +7,7 @@ This repository contains various utilities developed for Unity, designed to simp
 ### Lootbox System
 A system to implement lootbox mechanics in your game. It supports customizable drop rates, item pools, and rarity levels.
 
-### Cards with Buff and Exchange System
+### Cards with Buff and Exchange System(Sprites are not included.)
 A dynamic card system where cards can provide buffs to the player. Includes a card exchange mechanic, allowing players to trade cards for different rewards.
 
 ### Persistent Singleton MonoBehaviour
