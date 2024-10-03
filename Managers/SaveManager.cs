@@ -3,6 +3,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 [DefaultExecutionOrder(0)]
 public class SaveManager : PersistentSingletonManager<SaveManager>
 {
@@ -11,6 +12,7 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
       [SerializeField] private GameFiles _gameFiles = new GameFiles();
       [SerializeField] private bool isSaving = false;
       private CancellationTokenSource cts = new CancellationTokenSource();
+      private JsonSerializerSettings serializerSettings;
       void OnDestroy()
       {
             cts?.Cancel();
@@ -18,17 +20,25 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
       }
       void Awake()
       {
+            InitializeJsonSerializerSettings();
             Load();
       }
       void Start()
       {
             RepeatSave().Forget();
       }
+      private void InitializeJsonSerializerSettings()
+      {
+            serializerSettings = new JsonSerializerSettings
+            {
+                  TypeNameHandling = TypeNameHandling.Auto,
+            };
+      }
       private async UniTaskVoid RepeatSave()
       {
             while (!cts.Token.IsCancellationRequested)
             {
-                  await UniTask.Delay(TimeSpan.FromSeconds(saveInterval))
+                  await UniTask.WaitForSeconds(saveInterval)
                   .AttachExternalCancellation(cts.Token);
                   await Save()
                   .AttachExternalCancellation(cts.Token);
@@ -41,16 +51,16 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
             isSaving = true;
             gameFiles.time = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
             gameFiles.version = Application.version;
-            string saveString = JsonUtility.ToJson(gameFiles);
+            string saveString = JsonConvert.SerializeObject(gameFiles, serializerSettings);
             PlayerPrefs.SetString("Save", saveString);
             await UniTask.WaitForSeconds(1f);
             isSaving = false;
       }
-      public void Load()
+      private void Load()
       {
             string loadString = PlayerPrefs.GetString("Save", "null");
             if (loadString != "null")
-                  JsonUtility.FromJsonOverwrite(loadString, gameFiles);
+                  _gameFiles = JsonConvert.DeserializeObject<GameFiles>(loadString, serializerSettings);
             else
                   Save().Forget();
       }
