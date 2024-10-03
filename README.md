@@ -41,4 +41,4 @@ To integrate any of these systems into your Unity project, follow these steps:
 1. Clone this repository or copy the relevant scripts into your project.
 2. Modify the systems as necessary to fit your game’s requirements.
 3. Ensure you have the required libraries (BigDouble and UniTask) installed.
-4. Attach the scripts to appropriate GameObjects or Scriptable Objects.
+4. Attach the scripts to appropriate GameObjects.
