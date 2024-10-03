@@ -29,6 +29,7 @@ A simple, scalable system for saving and loading game data using JSON. Supports 
 
 - **BigDouble**: Utilized for handling large numbers, especially in idle or incremental games.
 - **UniTask**: Used for asynchronous operations in Unity, providing a more flexible and efficient approach than traditional coroutines.
+- **DOTween**: Used for handling animations and tweening in Unity, offering a powerful and easy-to-use system for smooth transitions.
 
 ## Note
 Some utilities are dependent on others. Ensure all required dependencies are implemented when integrating multiple systems.
