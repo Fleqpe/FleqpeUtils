@@ -26,25 +26,30 @@ public class DailyQuestManager : PersistentSingletonManager<DailyQuestManager>
     }
     private async UniTaskVoid PassTime()
     {
-        await UniTask.WaitForSeconds(1)
-        .AttachExternalCancellation(cts.Token);
-        SaveManager.gameFiles.dailyQuestData.timeBasedQuests.ForEach(x =>
+        while (!cts.Token.IsCancellationRequested)
         {
-            if (x == null)
-                return;
-            else
+            await UniTask.WaitForSeconds(1)
+            .AttachExternalCancellation(cts.Token);
+            SaveManager.gameFiles.dailyQuestData.timeBasedQuests.ForEach(x =>
             {
-                x.PassTime(1);
-                ClaimTimeBasedQuestReward(x);
-            }
-        });
-        PassTime().Forget();
+                if (x == null)
+                    return;
+                else
+                {
+                    x.PassTime(1);
+                    ClaimTimeBasedQuestReward(x);
+                }
+            });
+        }
     }
-    private void ClaimTimeBasedQuestReward(QuestData questData)
+    private void ClaimTimeBasedQuestReward(TimeBasedQuestData questData)
     {
         TimeBasedQuestEntry timeBasedQuestEntry = QuestDatabase.Instance.GetTimeBasedQuestEntry(questData.ID);
         if (questData.isCompleted && timeBasedQuestEntry != null)
-            SaveManager.gameFiles.currencyData.EarnPremiumMoney(timeBasedQuestEntry.reward);
+        {
+            SaveManager.gameFiles.playerData.currencyData.EarnPremiumMoney(timeBasedQuestEntry.reward);
+            SaveManager.gameFiles.dailyQuestData.timeBasedQuests.Remove(questData);
+        }
         else
             return;
     }

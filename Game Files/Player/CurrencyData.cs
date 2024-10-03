@@ -5,8 +5,6 @@ public class CurrencyData
 {
     public BigDouble money = new BigDouble(5, 2);
     public BigDouble premiumMoney = new BigDouble(0, 0);
-    public BigDouble level = 0;
-    public BigDouble xp = 0;
     public void SpendMoney(BigDouble amount)
     {
         money -= amount;
@@ -22,6 +20,7 @@ public class CurrencyData
     public void EarnPremiumMoney(BigDouble amount)
     {
         premiumMoney += amount;
+        EventBus.onPremiumCurrencyEarn?.Invoke();
     }
     public bool HaveEnoughMoney(BigDouble amount) { return money >= amount; }
 }

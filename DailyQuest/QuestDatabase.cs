@@ -6,10 +6,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "QuestDatabase", menuName = "ScriptableObjects/Database/Quest Database")]
 public class QuestDatabase : SingletonSO<QuestDatabase>
 {
-    [TableList]
-    [SerializeField] private List<QuestEntry> quests = new List<QuestEntry>();
-    [SerializeField] private List<TimeBasedQuestEntry> timeBasedQuests = new List<TimeBasedQuestEntry>();
-    [SerializeField] private List<CountBasedQuestEntry> countBasedQuests = new List<CountBasedQuestEntry>();
+    [TableList][SerializeField] private List<QuestEntry> quests = new List<QuestEntry>();
+    [TableList][SerializeField] private List<TimeBasedQuestEntry> timeBasedQuests = new List<TimeBasedQuestEntry>();
+    [TableList][SerializeField] private List<CountBasedQuestEntry> countBasedQuests = new List<CountBasedQuestEntry>();
     public QuestEntry GetQuestEntry(int ID)
     {
         return quests.FirstOrDefault(x => x.ID == ID);

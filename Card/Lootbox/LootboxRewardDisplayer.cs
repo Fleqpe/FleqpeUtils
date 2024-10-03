@@ -25,8 +25,10 @@ public class LootboxRewardDisplayer : MonoBehaviour
         if (lootboxItem is not LootboxCardItem)
             return;
         LootboxCardItem cardItem = (LootboxCardItem)lootboxItem;
-        await SetRarityText(cardItem);
-        await SetBonusText(cardItem);
+        await SetRarityText(cardItem)
+        .AttachExternalCancellation(cts.Token);
+        await SetBonusText(cardItem)
+        .AttachExternalCancellation(cts.Token);
         SetItemInformation(cardItem);
         menu.Open();
     }

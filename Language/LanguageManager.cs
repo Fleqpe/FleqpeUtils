@@ -7,7 +7,7 @@ using UnityEngine.Localization.Settings;
 
 public class LanguageManager : PersistentSingletonManager<LanguageManager>
 {
-    public static bool isLanguageSystemReady = false;
+    public bool isLanguageSystemReady = false;
     private CancellationTokenSource cts = new CancellationTokenSource();
     private void Awake()
     {

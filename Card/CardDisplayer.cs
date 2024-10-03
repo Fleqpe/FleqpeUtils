@@ -96,17 +96,19 @@ public class CardDisplayer : MonoBehaviour
     }
     private async UniTaskVoid Display()
     {
-        await UniTask.WaitUntil(() => LanguageManager.isLanguageSystemReady)
-        .AttachExternalCancellation(cts.Token);
-        CardInventory cardInventory = SaveManager.gameFiles.cardInventory;
-        CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
-        SetButtons(cardInformation, cardInventory);
-        SetCardData(cardInformation);
-        await SetText(cardInformation)
-        .AttachExternalCancellation(cts.Token);
-        await UniTask.WaitForSeconds(0.1f)
-        .AttachExternalCancellation(cts.Token);
-        Display().Forget();
+        while (!cts.Token.IsCancellationRequested)
+        {
+            await UniTask.WaitUntil(() => LanguageManager.Instance.isLanguageSystemReady)
+            .AttachExternalCancellation(cts.Token);
+            CardInventory cardInventory = SaveManager.gameFiles.cardInventory;
+            CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
+            SetButtons(cardInformation, cardInventory);
+            SetCardData(cardInformation);
+            await SetText(cardInformation)
+            .AttachExternalCancellation(cts.Token);
+            await UniTask.WaitForSeconds(0.25f)
+            .AttachExternalCancellation(cts.Token);
+        }
     }
     private async UniTask SetText(CardInformation cardInformation)
     {

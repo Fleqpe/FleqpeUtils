@@ -25,10 +25,16 @@ public class TimeBasedQuestData : QuestData
     public void PassTime(int seconds)
     {
         if (isCompleted)
+        {
             return;
-        timeSpent += seconds;
-        if (timeSpent >= QuestDatabase.Instance.GetTimeBasedQuestEntry(ID).requiredTime)
-            isCompleted = true;
+        }
+        else
+        {
+            if (timeSpent >= QuestDatabase.Instance.GetTimeBasedQuestEntry(ID).requiredTime)
+                isCompleted = true;
+            else
+                timeSpent += seconds;
+        }
     }
 }
 [System.Serializable]
@@ -38,9 +44,15 @@ public class CountBasedQuestData : QuestData
     public void AddProgress(int progress, int required)
     {
         if (isCompleted)
+        {
             return;
-        current += progress;
-        if (current >= required)
-            isCompleted = true;
+        }
+        else
+        {
+            if (current >= required)
+                isCompleted = true;
+            else
+                current += progress;
+        }
     }
 }

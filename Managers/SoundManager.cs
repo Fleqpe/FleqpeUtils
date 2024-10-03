@@ -29,13 +29,16 @@ public class SoundManager : PersistentSingletonManager<SoundManager>
     }
     private async UniTaskVoid RepeatableTask()
     {
-        await UniTask.WaitForSeconds(0.5f)
-            .AttachExternalCancellation(cts.Token);
-        buy.volume = buyStartVolume * SaveManager.gameFiles.settingsData.sfx;
-        music.volume = musicStartVolume * SaveManager.gameFiles.settingsData.music;
-        click.volume = clickStartVolume * SaveManager.gameFiles.settingsData.sfx;
-        success.volume = successStartVolume * SaveManager.gameFiles.settingsData.sfx;
-        RepeatableTask().Forget();
+        while (!cts.Token.IsCancellationRequested)
+        {
+            await UniTask.WaitForSeconds(0.5f)
+                .AttachExternalCancellation(cts.Token);
+            SettingsData settingsData = SaveManager.gameFiles.playerData.settingsData;
+            buy.volume = buyStartVolume * settingsData.sfx;
+            music.volume = musicStartVolume * settingsData.music;
+            click.volume = clickStartVolume * settingsData.sfx;
+            success.volume = successStartVolume * settingsData.sfx;
+        }
     }
     public void PlayBuy()
     {

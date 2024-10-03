@@ -46,7 +46,7 @@ public class CardExchangeDisplayer : MonoBehaviour
         BigDouble totalSellPrice = BigDouble.Multiply(singleSellPrice, countToSell);
 
         cardData.count -= countToSell;
-        SaveManager.gameFiles.currencyData.EarnPremiumMoney(totalSellPrice);
+        SaveManager.gameFiles.playerData.currencyData.EarnPremiumMoney(totalSellPrice);
 
         sellButton.interactable = false;
         SoundManager.Instance.PlayBuy();
@@ -64,15 +64,17 @@ public class CardExchangeDisplayer : MonoBehaviour
 
     private async UniTaskVoid Display()
     {
-        await UniTask.WaitUntil(() => LanguageManager.isLanguageSystemReady)
+        while (!cts.Token.IsCancellationRequested)
+        {
+            await UniTask.WaitUntil(() => LanguageManager.Instance.isLanguageSystemReady)
         .AttachExternalCancellation(cts.Token);
-        CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
-        SetTexts(cardInformation);
-        SetImages(cardInformation);
-        SetButtons();
-        await UniTask.WaitForSeconds(0.1f)
-         .AttachExternalCancellation(cts.Token);
-        Display().Forget();
+            CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
+            SetTexts(cardInformation);
+            SetImages(cardInformation);
+            SetButtons();
+            await UniTask.WaitForSeconds(0.25f)
+             .AttachExternalCancellation(cts.Token);
+        }
     }
     private void SetTexts(CardInformation cardInformation)
     {

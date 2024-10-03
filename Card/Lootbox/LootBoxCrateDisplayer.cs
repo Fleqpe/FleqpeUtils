@@ -26,17 +26,19 @@ public class LootBoxCrateDisplayer : MonoBehaviour
     }
     private async UniTaskVoid Display()
     {
-        await UniTask.WaitForSeconds(0.1f)
-        .AttachExternalCancellation(cts.Token);
-        await UniTask.WaitUntil(() => LanguageManager.isLanguageSystemReady)
-        .AttachExternalCancellation(cts.Token);
-        await SetTexts();
-        SetButtons();
-        Display().Forget();
+        while (!cts.Token.IsCancellationRequested)
+        {
+            await UniTask.WaitForSeconds(0.1f)
+            .AttachExternalCancellation(cts.Token);
+            await UniTask.WaitUntil(() => LanguageManager.Instance.isLanguageSystemReady)
+            .AttachExternalCancellation(cts.Token);
+            await SetTexts();
+            SetButtons();
+        }
     }
     private void SetButtons()
     {
-        button.interactable = SaveManager.gameFiles.currencyData.premiumMoney >= price;
+        button.interactable = SaveManager.gameFiles.playerData.currencyData.premiumMoney >= price;
     }
     private async UniTask SetTexts()
     {
@@ -56,11 +58,11 @@ public class LootBoxCrateDisplayer : MonoBehaviour
     }
     public void OpenBox()
     {
-        if (SaveManager.gameFiles.currencyData.premiumMoney < price) return;
+        if (SaveManager.gameFiles.playerData.currencyData.premiumMoney < price) return;
         LootboxItem lootboxItem = lootboxDropTable.GetRandomItem();
         lootboxItem.Apply();
         lootboxRewardDisplayer.Display(lootboxItem);
         CardDisplayerManager.onUnbox.Invoke();
-        SaveManager.gameFiles.currencyData.SpendPremiumMoney(price);
+        SaveManager.gameFiles.playerData.currencyData.SpendPremiumMoney(price);
     }
 }
