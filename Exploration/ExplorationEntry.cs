@@ -6,4 +6,7 @@ using UnityEngine;
 public class ExplorationEntry : EntrySO<ExplorationEntry>
 {
     public BigDouble levelRequirement;
+    public int starRequirement;
+    public int timeToSpendOnThisMission;
+    public DropTable<MaterialEntry> materialDropTable = new DropTable<MaterialEntry>();
 }

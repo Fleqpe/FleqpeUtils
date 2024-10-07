@@ -24,7 +24,7 @@ public class PersistentSingletonManager<T> : MonoBehaviour where T : MonoBehavio
                     Destroy(instances[i].gameObject);
             }
             _instance = instances.Length > 0 ? instances[0] : new GameObject(typeof(T).ToString()).AddComponent<T>();
+            DontDestroyOnLoad(_instance.gameObject);
         }
-        DontDestroyOnLoad(_instance.gameObject);
     }
 }

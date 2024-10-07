@@ -7,7 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LootBoxCrateDisplayer : MonoBehaviour
+public class LootboxCrateDisplayer : MonoBehaviour
 {
     [SerializeField] private LootboxDropTable lootboxDropTable;
     [SerializeField] private TMP_Text rarityList, priceText;

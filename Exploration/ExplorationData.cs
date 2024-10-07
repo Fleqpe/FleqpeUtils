@@ -1,18 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class ExplorationData : MonoBehaviour
+[System.Serializable]
+public class ExplorationData
 {
-    public int explorationID;
+    public int ID;
     public PetData pet;
     public int secondsLeft;
     public bool isCompleted;
-    public ExplorationData(int explorationID, PetData pet, int secondsLeft)
+    public ExplorationData(int ID, PetData pet, int secondsLeft)
     {
         this.pet = pet;
         this.secondsLeft = secondsLeft;
-        this.explorationID = explorationID;
+        this.ID = ID;
     }
     public void PassTime(int time)
     {

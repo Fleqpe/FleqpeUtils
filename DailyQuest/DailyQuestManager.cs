@@ -32,25 +32,8 @@ public class DailyQuestManager : PersistentSingletonManager<DailyQuestManager>
             .AttachExternalCancellation(cts.Token);
             SaveManager.gameFiles.dailyQuestData.timeBasedQuests.ForEach(x =>
             {
-                if (x == null)
-                    return;
-                else
-                {
-                    x.PassTime(1);
-                    ClaimTimeBasedQuestReward(x);
-                }
+                x?.PassTime(1);
             });
         }
-    }
-    private void ClaimTimeBasedQuestReward(TimeBasedQuestData questData)
-    {
-        TimeBasedQuestEntry timeBasedQuestEntry = QuestDatabase.Instance.GetTimeBasedQuestEntry(questData.ID);
-        if (questData.isCompleted && timeBasedQuestEntry != null)
-        {
-            SaveManager.gameFiles.playerData.currencyData.EarnPremiumMoney(timeBasedQuestEntry.reward);
-            SaveManager.gameFiles.dailyQuestData.timeBasedQuests.Remove(questData);
-        }
-        else
-            return;
     }
 }

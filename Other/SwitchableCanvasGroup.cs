@@ -1,44 +1,29 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
-
-public class MenuManager : SingletonManager<MenuManager>
+[RequireComponent(typeof(CanvasGroup))]
+public class SwitchableCanvasGroup : MonoBehaviour
 {
-    private List<CanvasGroup> canvasGroups = new List<CanvasGroup>();
-    [SerializeField] private List<CanvasGroup> blackListCanvasGroup = new List<CanvasGroup>();
-    public static Action<CanvasGroup> onClose, onOpen;
-    void Awake()
+    private CanvasGroup targetCanvasGroup;
+    private void Awake()
     {
-        canvasGroups = FindObjectsOfType<CanvasGroup>().ToList();
-        blackListCanvasGroup.ForEach(x => canvasGroups.Remove(x));
-        canvasGroups.ForEach(otherCanvasGroup => otherCanvasGroup.Close());
+        targetCanvasGroup = GetComponent<CanvasGroup>();
     }
-    public void SwitchCanvasGroup(CanvasGroup targetCanvasGroup)
+    public void Switch()
     {
-        canvasGroups.ForEach(otherCanvasGroup => otherCanvasGroup.Close());
-        targetCanvasGroup.Open();
-    }
-    public void Switch(CanvasGroup targetCanvasGroup)
-    {
-        if (targetCanvasGroup.alpha == 1)
-            onClose?.Invoke(targetCanvasGroup);
-        else
-            onOpen?.Invoke(targetCanvasGroup);
         targetCanvasGroup.Switch();
     }
-    public void Close(CanvasGroup targetCanvasGroup)
+    public void Close()
     {
         targetCanvasGroup.Close();
-        onClose?.Invoke(targetCanvasGroup);
     }
-    public void Open(CanvasGroup targetCanvasGroup)
+    public void Open()
     {
         targetCanvasGroup.Open();
-        onOpen?.Invoke(targetCanvasGroup);
     }
-
 }
+
 public static class CanvasGroupExtension
 {
     public static void Open(this CanvasGroup c)

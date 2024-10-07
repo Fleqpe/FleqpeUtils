@@ -36,6 +36,17 @@ public class TimeBasedQuestData : QuestData
                 timeSpent += seconds;
         }
     }
+    public void ClaimTimeBasedQuestReward()
+    {
+        TimeBasedQuestEntry timeBasedQuestEntry = QuestDatabase.Instance.GetTimeBasedQuestEntry(ID);
+        if (isCompleted && timeBasedQuestEntry != null)
+        {
+            SaveManager.gameFiles.playerData.currencyData.EarnPremiumMoney(timeBasedQuestEntry.reward);
+            SaveManager.gameFiles.dailyQuestData.timeBasedQuests.Remove(this);
+        }
+        else
+            return;
+    }
 }
 [System.Serializable]
 public class CountBasedQuestData : QuestData

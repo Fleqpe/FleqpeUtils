@@ -7,4 +7,6 @@ public class MaterialEntry : EntrySO<MaterialEntry>
     public string title;
     [Multiline(3)]
     public string description;
+    public Rarity rarity;
+    public Sprite icon;
 }

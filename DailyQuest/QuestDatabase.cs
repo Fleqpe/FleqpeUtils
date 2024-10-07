@@ -1,8 +1,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Sirenix.OdinInspector;
 using UnityEngine;
+using Sirenix.OdinInspector;
 [CreateAssetMenu(fileName = "QuestDatabase", menuName = "ScriptableObjects/Database/Quest Database")]
 public class QuestDatabase : SingletonSO<QuestDatabase>
 {

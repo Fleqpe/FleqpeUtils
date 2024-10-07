@@ -9,8 +9,9 @@ using UnityEngine.UIElements;
 
 public class SoundManager : PersistentSingletonManager<SoundManager>
 {
-    [SerializeField] private AudioSource buy, music, click, success;
-    private float buyStartVolume, musicStartVolume, clickStartVolume, successStartVolume;
+    [SerializeField] private AudioClip buy, click, success;
+    [SerializeField] private AudioSource music, sfx;
+    private float musicVolume, sfxVolume;
     private CancellationTokenSource cts = new CancellationTokenSource();
     void OnDestroy()
     {
@@ -19,9 +20,8 @@ public class SoundManager : PersistentSingletonManager<SoundManager>
     }
     void Awake()
     {
-        musicStartVolume = music.volume;
-        buyStartVolume = buy.volume;
-        clickStartVolume = click.volume;
+        musicVolume = music.volume;
+        sfxVolume = sfx.volume;
     }
     void Start()
     {
@@ -34,22 +34,23 @@ public class SoundManager : PersistentSingletonManager<SoundManager>
             await UniTask.WaitForSeconds(0.5f)
                 .AttachExternalCancellation(cts.Token);
             SettingsData settingsData = SaveManager.gameFiles.playerData.settingsData;
-            buy.volume = buyStartVolume * settingsData.sfx;
-            music.volume = musicStartVolume * settingsData.music;
-            click.volume = clickStartVolume * settingsData.sfx;
-            success.volume = successStartVolume * settingsData.sfx;
+            music.volume = musicVolume * settingsData.music;
+            sfx.volume = sfxVolume * settingsData.sfx;
         }
     }
     public void PlayBuy()
     {
-        buy.PlayOneShot(buy.clip);
+        sfx.clip = buy;
+        sfx.Play();
     }
     public void PlayClick()
     {
-        click.PlayOneShot(click.clip);
+        sfx.clip = click;
+        sfx.Play();
     }
     public void PlaySuccess()
     {
-        success.PlayOneShot(success.clip);
+        sfx.clip = success;
+        sfx.Play();
     }
 }

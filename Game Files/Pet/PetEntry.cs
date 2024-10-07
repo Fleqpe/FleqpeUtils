@@ -7,4 +7,6 @@ public class PetEntry : EntrySO<PetEntry>
     public string title;
     [Multiline(3)]
     public string description;
+    public Sprite sprite;
+    public GameObject prefab;
 }

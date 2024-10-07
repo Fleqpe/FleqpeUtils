@@ -6,20 +6,16 @@ using UnityEngine;
 public class ExperienceData
 {
     public BigDouble xp, level = 1;
-    public void EarnXP(BigDouble xp)
+    public void EarnXP(BigDouble earnedXP)
     {
-        this.xp += xp;
-        BigDouble requiredXP = GameDatabase.Instance.GetRequiredXP(level);
-        bool calledLevelUp = false;
-        while (xp >= requiredXP)
+        xp += earnedXP;
+        BigDouble initialLevel = level;
+        while (xp >= GameDatabase.Instance.GetRequiredXPForPets(level))
         {
-            xp -= requiredXP;
+            xp -= GameDatabase.Instance.GetRequiredXPForPets(level);
             level += 1;
-            if (!calledLevelUp)
-            {
-                EventBus.onLevelUp?.Invoke();
-                calledLevelUp = true;
-            }
         }
+        if (level > initialLevel)
+            EventBus.onPetLevelUp?.Invoke(this);
     }
 }

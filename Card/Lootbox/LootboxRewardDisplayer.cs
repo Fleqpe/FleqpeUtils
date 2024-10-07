@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class LootboxRewardDisplayer : MonoBehaviour
 {
-    [SerializeField] private CanvasGroup menu;
+    [SerializeField] private SwitchableCanvasGroup menu;
     [SerializeField] private TMP_Text itemName, count, rarity, bonus;
     [SerializeField] private Image itemImage, itemFrame;
     private CancellationTokenSource cts = new CancellationTokenSource();
@@ -41,8 +41,8 @@ public class LootboxRewardDisplayer : MonoBehaviour
     private async UniTask SetRarityText(LootboxCardItem cardItem)
     {
         rarity.text = await cardItem.cardInformation.rarity.GetLocalizedString(cts.Token);
-        rarity.SetTextMaterial(cardItem.GetRarity());
-        itemFrame.SetImageMaterial(cardItem.GetRarity());
+        rarity.SetTextMaterial(cardItem.cardInformation.rarity);
+        itemFrame.SetImageMaterial(cardItem.cardInformation.rarity);
     }
     private async UniTask SetBonusText(LootboxCardItem cardItem)
     {

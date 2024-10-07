@@ -1,7 +1,7 @@
 [System.Serializable]
 public class PetData
 {
-    public int ID, stars;
+    public int ID, stars, crowns;
     public ExperienceData experienceData = new ExperienceData();
     public PetData()
     {

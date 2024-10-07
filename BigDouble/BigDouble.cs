@@ -30,10 +30,8 @@ namespace FleqpeUtils
                   private const long DoubleExpMin = -324;
 
 #if UNITY_2017_1_OR_NEWER
-                  [SerializeField]
-                  private double mantissa;
-                  [SerializeField]
-                  private long exponent;
+                  public double mantissa;
+                  public long exponent;
 #else
         private double mantissa;
         private long exponent;
@@ -204,7 +202,14 @@ namespace FleqpeUtils
                         if (Math.Abs(resultrounded - result) < 1e-10) return resultrounded;
                         return result;
                   }
-
+                  public float ToFloat()
+                  {
+                        return (float)ToDouble();
+                  }
+                  public float ToPercentage()
+                  {
+                        return ToFloat() * 100;
+                  }
                   public override string ToString()
                   {
                         return BigNumber.FormatBigDouble(this, null, null);
