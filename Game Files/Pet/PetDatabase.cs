@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FleqpeUtils.BreakInfinity;
 using Sirenix.OdinInspector;
 using UnityEngine;
 [CreateAssetMenu(fileName = "PetDatabase", menuName = "ScriptableObjects/Database/Pet Database")]

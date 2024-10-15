@@ -20,7 +20,6 @@ public class SingletonManager<T> : MonoBehaviour where T : MonoBehaviour
             T[] instances = FindObjectsOfType<T>();
             if (instances.Length > 1)
             {
-                Debug.LogWarning($"There are {instances.Length} instances of SingletonManager<{typeof(T)}>! Destroying extras...");
                 for (int i = instances.Length - 1; i > 1; i--)
                     Destroy(instances[i].gameObject);
             }

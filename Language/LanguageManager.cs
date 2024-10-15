@@ -8,7 +8,6 @@ using UnityEngine.Localization.Settings;
 public class LanguageManager : PersistentSingletonManager<LanguageManager>
 {
     public bool isLanguageSystemReady = false;
-    private CancellationTokenSource cts = new CancellationTokenSource();
     private void Awake()
     {
         Initialize().Forget();
@@ -17,7 +16,7 @@ public class LanguageManager : PersistentSingletonManager<LanguageManager>
     private async UniTaskVoid Initialize()
     {
         await LocalizationSettings.InitializationOperation.ToUniTask()
-        .AttachExternalCancellation(cts.Token);
+        .AttachExternalCancellation(destroyCancellationToken);
         isLanguageSystemReady = true;
     }
     public void ChangeLocale(int localeID)
@@ -28,7 +27,7 @@ public class LanguageManager : PersistentSingletonManager<LanguageManager>
     private async UniTaskVoid GetCurrentLocale()
     {
         await UniTask.WaitUntil(() => isLanguageSystemReady)
-        .AttachExternalCancellation(cts.Token);
+        .AttachExternalCancellation(destroyCancellationToken);
         int id = LocalizationSettings.AvailableLocales.Locales.IndexOf(LocalizationSettings.SelectedLocale);
         LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[PlayerPrefs.GetInt("LocaleKey", id)];
     }
@@ -36,7 +35,7 @@ public class LanguageManager : PersistentSingletonManager<LanguageManager>
     {
         isLanguageSystemReady = false;
         await LocalizationSettings.InitializationOperation.ToUniTask()
-        .AttachExternalCancellation(cts.Token);
+        .AttachExternalCancellation(destroyCancellationToken);
         isLanguageSystemReady = true;
         LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[localeID];
         PlayerPrefs.SetInt("LocaleKey", localeID);

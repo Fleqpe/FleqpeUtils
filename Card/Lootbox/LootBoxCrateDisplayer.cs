@@ -14,24 +14,18 @@ public class LootboxCrateDisplayer : MonoBehaviour
     [SerializeField] private Button button;
     [SerializeField] private LootboxRewardDisplayer lootboxRewardDisplayer;
     [SerializeField] private int price;
-    private CancellationTokenSource cts = new CancellationTokenSource();
-    private void OnDestroy()
-    {
-        cts?.Cancel();
-        cts?.Dispose();
-    }
     private void Start()
     {
         Display().Forget();
     }
     private async UniTaskVoid Display()
     {
-        while (!cts.Token.IsCancellationRequested)
+        while (!destroyCancellationToken.IsCancellationRequested)
         {
             await UniTask.WaitForSeconds(0.1f)
-            .AttachExternalCancellation(cts.Token);
+            .AttachExternalCancellation(destroyCancellationToken);
             await UniTask.WaitUntil(() => LanguageManager.Instance.isLanguageSystemReady)
-            .AttachExternalCancellation(cts.Token);
+            .AttachExternalCancellation(destroyCancellationToken);
             await SetTexts();
             SetButtons();
         }
@@ -52,7 +46,7 @@ public class LootboxCrateDisplayer : MonoBehaviour
         float totalChance = lootboxDropTable.GetTotalChance();
         float chance = lootboxDropTable.GetTotalChanceOfRarity(rarity);
         if (chance > 0)
-            return $"<color={"#" + rarity.GetColorHexCode()}>{await rarity.GetLocalizedString(cts.Token)} %{chance / totalChance * 100}" + "\n";
+            return $"<color={"#" + rarity.GetColorHexCode()}>{await rarity.GetLocalizedString(destroyCancellationToken)} %{chance / totalChance * 100}" + "\n";
         else
             return "";
     }

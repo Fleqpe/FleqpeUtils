@@ -16,12 +16,6 @@ public class CardExchangeDisplayer : MonoBehaviour
     [SerializeField] private Image cardFrame, cardImage;
     [SerializeField] private int countToSell = 0;
     [SerializeField] private Button countIncrease, countDecrease, sellButton;
-    private CancellationTokenSource cts = new CancellationTokenSource();
-    private void OnDestroy()
-    {
-        cts?.Cancel();
-        cts?.Dispose();
-    }
     private void Start()
     {
         CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
@@ -64,16 +58,16 @@ public class CardExchangeDisplayer : MonoBehaviour
 
     private async UniTaskVoid Display()
     {
-        while (!cts.Token.IsCancellationRequested)
+        while (!destroyCancellationToken.IsCancellationRequested)
         {
             await UniTask.WaitUntil(() => LanguageManager.Instance.isLanguageSystemReady)
-        .AttachExternalCancellation(cts.Token);
+        .AttachExternalCancellation(destroyCancellationToken);
             CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
             SetTexts(cardInformation);
             SetImages(cardInformation);
             SetButtons();
             await UniTask.WaitForSeconds(0.25f)
-             .AttachExternalCancellation(cts.Token);
+             .AttachExternalCancellation(destroyCancellationToken);
         }
     }
     private void SetTexts(CardInformation cardInformation)

@@ -11,13 +11,7 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
       [SerializeField] private float saveInterval;
       [SerializeField] private GameFiles _gameFiles = new GameFiles();
       [SerializeField] private bool isSaving = false;
-      private CancellationTokenSource cts = new CancellationTokenSource();
       private JsonSerializerSettings serializerSettings;
-      void OnDestroy()
-      {
-            cts?.Cancel();
-            cts?.Dispose();
-      }
       void Awake()
       {
             InitializeJsonSerializerSettings();
@@ -36,12 +30,12 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
       }
       private async UniTaskVoid RepeatSave()
       {
-            while (!cts.Token.IsCancellationRequested)
+            while (!destroyCancellationToken.IsCancellationRequested)
             {
                   await UniTask.WaitForSeconds(saveInterval)
-                  .AttachExternalCancellation(cts.Token);
+                  .AttachExternalCancellation(destroyCancellationToken);
                   await Save()
-                  .AttachExternalCancellation(cts.Token);
+                  .AttachExternalCancellation(destroyCancellationToken);
             }
       }
       public async UniTask Save()

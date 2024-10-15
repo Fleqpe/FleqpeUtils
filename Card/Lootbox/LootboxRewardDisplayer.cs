@@ -10,12 +10,6 @@ public class LootboxRewardDisplayer : MonoBehaviour
     [SerializeField] private SwitchableCanvasGroup menu;
     [SerializeField] private TMP_Text itemName, count, rarity, bonus;
     [SerializeField] private Image itemImage, itemFrame;
-    private CancellationTokenSource cts = new CancellationTokenSource();
-    void OnDestroy()
-    {
-        cts?.Cancel();
-        cts?.Dispose();
-    }
     public void Display(LootboxItem lootboxItem)
     {
         DisplayCard(lootboxItem).Forget();
@@ -26,9 +20,9 @@ public class LootboxRewardDisplayer : MonoBehaviour
             return;
         LootboxCardItem cardItem = (LootboxCardItem)lootboxItem;
         await SetRarityText(cardItem)
-        .AttachExternalCancellation(cts.Token);
+        .AttachExternalCancellation(destroyCancellationToken);
         await SetBonusText(cardItem)
-        .AttachExternalCancellation(cts.Token);
+        .AttachExternalCancellation(destroyCancellationToken);
         SetItemInformation(cardItem);
         menu.Open();
     }
@@ -40,13 +34,13 @@ public class LootboxRewardDisplayer : MonoBehaviour
     }
     private async UniTask SetRarityText(LootboxCardItem cardItem)
     {
-        rarity.text = await cardItem.cardInformation.rarity.GetLocalizedString(cts.Token);
+        rarity.text = await cardItem.cardInformation.rarity.GetLocalizedString(destroyCancellationToken);
         rarity.SetTextMaterial(cardItem.cardInformation.rarity);
         itemFrame.SetImageMaterial(cardItem.cardInformation.rarity);
     }
     private async UniTask SetBonusText(LootboxCardItem cardItem)
     {
-        bonus.text = await cardItem.cardInformation.cardBonus.cardBonusType.GetLocalizedString(cts.Token);
+        bonus.text = await cardItem.cardInformation.cardBonus.cardBonusType.GetLocalizedString(destroyCancellationToken);
         bonus.text += "<color=green>" + (cardItem.cardInformation.IsPercentageBased() ? " %" : " +") + cardItem.cardInformation.cardBonus.GetBonusAmount(1);
     }
 }

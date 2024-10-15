@@ -16,18 +16,12 @@ public class RarityManager : PersistentSingletonManager<RarityManager>
     public Material GetImageMaterial(Rarity rarity)
     {
         RarityAndMaterial rarityAndMaterial = imageMaterials.FirstOrDefault(x => x.rarity == rarity);
-        if (rarityAndMaterial == null)
-            return imageMaterials.First().material;
-        else
-            return rarityAndMaterial.material;
+        return rarityAndMaterial.material;
     }
     public Material GetTextMaterial(Rarity rarity)
     {
         RarityAndMaterial rarityAndMaterial = textMaterials.FirstOrDefault(x => x.rarity == rarity);
-        if (rarityAndMaterial == null)
-            return textMaterials.First().material;
-        else
-            return rarityAndMaterial.material;
+        return rarityAndMaterial.material;
     }
 }
 [System.Serializable]

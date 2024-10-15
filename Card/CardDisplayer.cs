@@ -14,12 +14,6 @@ public class CardDisplayer : MonoBehaviour
     [SerializeField] private TMP_Text cardName, level, count, rarity, buff;
     [SerializeField] private Image cardFrame, cardImage;
     [SerializeField] private GameObject equipIndicator;
-    private CancellationTokenSource cts = new CancellationTokenSource();
-    private void OnDestroy()
-    {
-        cts?.Cancel();
-        cts?.Dispose();
-    }
     private void Start()
     {
         if (CardDatabase.Instance.GetCardInformation(cardData.ID) != null)
@@ -96,28 +90,28 @@ public class CardDisplayer : MonoBehaviour
     }
     private async UniTaskVoid Display()
     {
-        while (!cts.Token.IsCancellationRequested)
+        while (!destroyCancellationToken.IsCancellationRequested)
         {
             await UniTask.WaitUntil(() => LanguageManager.Instance.isLanguageSystemReady)
-            .AttachExternalCancellation(cts.Token);
+            .AttachExternalCancellation(destroyCancellationToken);
             CardInventory cardInventory = SaveManager.gameFiles.cardInventory;
             CardInformation cardInformation = CardDatabase.Instance.GetCardInformation(cardData.ID);
             SetButtons(cardInformation, cardInventory);
             SetCardData(cardInformation);
             await SetText(cardInformation)
-            .AttachExternalCancellation(cts.Token);
+            .AttachExternalCancellation(destroyCancellationToken);
             await UniTask.WaitForSeconds(0.25f)
-            .AttachExternalCancellation(cts.Token);
+            .AttachExternalCancellation(destroyCancellationToken);
         }
     }
     private async UniTask SetText(CardInformation cardInformation)
     {
         buff.text = "<color=green>" + (cardInformation.IsPercentageBased() ? " %" : " +") + cardInformation.cardBonus.GetBonusAmount(cardData.level);
-        buff.text += " </color>" + await cardInformation.cardBonus.cardBonusType.GetLocalizedString(cts.Token);
+        buff.text += " </color>" + await cardInformation.cardBonus.cardBonusType.GetLocalizedString(destroyCancellationToken);
         cardName.text = cardInformation.cardName;
         level.text = cardData.level < cardInformation.maxLevel ? "Lv " + cardData.level.ToString() : "MAX";
         count.text = cardData.count.ToString() + $"/{cardInformation.requiredForUpgrade}";
-        rarity.text = await cardInformation.rarity.GetLocalizedString(cts.Token);
+        rarity.text = await cardInformation.rarity.GetLocalizedString(destroyCancellationToken);
     }
     private void SetButtons(CardInformation cardInformation, CardInventory cardInventory)
     {

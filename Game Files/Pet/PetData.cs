@@ -1,3 +1,5 @@
+using FleqpeUtils.BreakInfinity;
+
 [System.Serializable]
 public class PetData
 {
@@ -13,6 +15,13 @@ public class PetData
             this.ID = petDataToCopy.ID;
             this.stars = petDataToCopy.stars;
         }
+    }
+    public Stats GetPetStats()
+    {
+        BigDouble starAndCrownBonus = ((stars + crowns) / 100f * 10f) + 1f;
+        PetEntry petEntry = PetDatabase.Instance.GetPet(ID);
+        Stats statsMultiplier = petEntry != null ? petEntry.statsMultiplier : new Stats();
+        return statsMultiplier.MultiplyWith(BigDouble.Multiply(starAndCrownBonus, experienceData.level));
     }
 }
 /*

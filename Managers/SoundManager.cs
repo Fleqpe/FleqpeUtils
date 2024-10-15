@@ -12,12 +12,6 @@ public class SoundManager : PersistentSingletonManager<SoundManager>
     [SerializeField] private AudioClip buy, click, success;
     [SerializeField] private AudioSource music, sfx;
     private float musicVolume, sfxVolume;
-    private CancellationTokenSource cts = new CancellationTokenSource();
-    void OnDestroy()
-    {
-        cts?.Cancel();
-        cts?.Dispose();
-    }
     void Awake()
     {
         musicVolume = music.volume;
@@ -29,10 +23,10 @@ public class SoundManager : PersistentSingletonManager<SoundManager>
     }
     private async UniTaskVoid RepeatableTask()
     {
-        while (!cts.Token.IsCancellationRequested)
+        while (!destroyCancellationToken.IsCancellationRequested)
         {
             await UniTask.WaitForSeconds(0.5f)
-                .AttachExternalCancellation(cts.Token);
+                .AttachExternalCancellation(destroyCancellationToken);
             SettingsData settingsData = SaveManager.gameFiles.playerData.settingsData;
             music.volume = musicVolume * settingsData.music;
             sfx.volume = sfxVolume * settingsData.sfx;
