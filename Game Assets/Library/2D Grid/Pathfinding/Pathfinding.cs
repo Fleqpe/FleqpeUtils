@@ -1,7 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -13,8 +10,6 @@ public class Pathfinding
     private List<PathNode> openList = new List<PathNode>();
     private List<PathNode> closedList = new List<PathNode>();
     private List<PathNode> simulationArea = new List<PathNode>();
-    public Tilemap walkInfoTileMap => BuildingSystem.instance.walkInfoTilemap;
-    public TileBase walkable => BuildingSystem.instance.walkableTile;
     public List<PathNode> FindPath(Vector3Int start, Vector3Int end, bool canMoveAllTiles)
     {
         return FindPath(start.x, start.y, end.x, end.y, canMoveAllTiles);
@@ -59,18 +54,13 @@ public class Pathfinding
         simulationArea.Clear();
         openList.Clear();
         closedList.Clear();
-        if (!canMoveAllTiles)
-        {
-            foreach (Vector3Int pos in walkInfoTileMap.cellBounds.allPositionsWithin)
-                if (walkInfoTileMap.GetTile(pos) == walkable)
-                    simulationArea.Add(new PathNode(pos.x, pos.y) { gCost = int.MaxValue, previousNode = null });
-        }
-        else
-        {
-            foreach (Vector3Int pos in walkInfoTileMap.cellBounds.allPositionsWithin)
-                if (walkInfoTileMap.GetTile(pos) != null)
-                    simulationArea.Add(new PathNode(pos.x, pos.y) { gCost = int.MaxValue, previousNode = null });
-        }
+        foreach (GridTile tile in GridMapDisplayer.Instance.GetGridMap().GetAllGridTiles())
+            if (tile.CanWalk() || canMoveAllTiles)
+                simulationArea.Add(new PathNode(tile.GetPosition().x, tile.GetPosition().y)
+                {
+                    gCost = int.MaxValue,
+                    previousNode = null
+                });
     }
     private List<PathNode> GetNeighbourNodes(PathNode currentNode)
     {

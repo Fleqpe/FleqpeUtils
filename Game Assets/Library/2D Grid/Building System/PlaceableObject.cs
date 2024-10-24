@@ -1,159 +1,102 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+using UnityEngine.Tilemaps;
 public class PlaceableObject : MonoBehaviour
 {
-    public Vector3 offset, interactOffset;
-    public BoundsInt area;
-    public Vector3 GetInteractPoint => area.position + interactOffset;
-    public bool canReplace = true, canNPCInteract = false, placed, canWalkThrough;
-    [SerializeField] private PlaceableObjectDataHandler placeableObjectDataHandler;
-    [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Collider2D cl2d;
-    [SerializeField] private CanvasGroup replaceItemMenu;
-    [SerializeField] private Canvas canvas;
-    [SerializeField] private Button replaceButton, removeButton;
-    private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-    private BoundsInt tempArea;
-    private void Awake()
+    [SerializeField] private bool placed, canWalkThrough;
+    [SerializeField] private Vector2Int size;
+    private GridMap gridMap;
+    private Tilemap tilemap;
+    void Awake()
     {
-        canvas.worldCamera = Camera.main;
-        replaceButton.onClick.AddListener(Replace);
-        removeButton.onClick.AddListener(Remove);
-    }
-    private void OnEnable()
-    {
-        BuildingSystem.onPlaceCancel += OnPlaceCancelCallBack;
-    }
-    private void OnDisable()
-    {
-        BuildingSystem.onPlaceCancel -= OnPlaceCancelCallBack;
-    }
-    private void Start()
-    {
-        Movement(cancellationTokenSource.Token)
-        .Forget();
-    }
-    private void Update()
-    {
-        cl2d.enabled = placed;
+        SetMaps();
+        Movement().Forget();
     }
     private void LateUpdate()
     {
-        if (!placed && Input.GetMouseButtonUp(0) && !EventSystem.current.IsPointerOverGameObject())
+        if (!placed && !EventSystem.current.IsPointerOverGameObject() && Input.GetMouseButtonDown(0))
             Place();
     }
-    private void OnMouseDown()
+    public void Load(Vector2Int cellPos)
     {
-        if (canReplace)
-            replaceItemMenu.Switch();
+        gridMap.SetBuildableOfTiles(cellPos, GetAreaEnd(cellPos), false);
+        placed = true;
     }
-    private void OnDestroy()
+    private Vector2Int GetAreaEnd(Vector2Int pos)
     {
-        cancellationTokenSource?.Cancel();
-        cancellationTokenSource?.Dispose();
+        return pos + size - Vector2Int.one;
     }
-    #region PlaceableObject Specific Methods
-    private async UniTaskVoid Movement(CancellationToken token)
+    private void SetMaps()
     {
-        try
+        gridMap = GridMapDisplayer.Instance.GetGridMap();
+        tilemap = GridMapDisplayer.Instance.GetTilemap();
+    }
+    private async UniTask Movement()
+    {
+        while (!destroyCancellationToken.IsCancellationRequested)
         {
-            await UniTask.WaitUntil(() => !placed && transform.position != GetLocalPosOfMouse() + offset, cancellationToken: token);
-            ClearTemporaryArea();
-            UniTask moveTask = transform.DOMove(GetLocalPosOfMouse() + offset, 0.1f)
-            .ToUniTask(cancellationToken: token);
-            bool canTakeArea = BuildingSystem.instance.CanTakeArea(GetAreaOfMouse());
-            spriteRenderer.color = (canTakeArea ? Color.green : Color.red) - new Color(0, 0, 0, 0.6f);
-            SetTemporaryArea(canTakeArea);
-            await UniTask.WhenAny(moveTask);
-            Movement(token).Forget();
-        }
-        catch (OperationCanceledException)
-        {
-            Debug.Log("Stopped Movement");
+            await UniTask.WaitForEndOfFrame().AttachExternalCancellation(destroyCancellationToken);
+            Vector2Int mouseCellPos = tilemap.GetCellPositionOfMouse();
+            Vector2Int objectPos = GetCellPositionOfGameObject();
+            if (mouseCellPos != objectPos && !placed && CanMoveToPosition(mouseCellPos))
+            {
+                MarkTemporaryArea(mouseCellPos, objectPos);
+                await MoveToPosition(mouseCellPos).AttachExternalCancellation(destroyCancellationToken);
+            }
         }
     }
-    private void SetAreaPositionToCurrentCellPosOfMouse()
+    private void MarkTemporaryArea(Vector2Int mouseCellPos, Vector2Int objectPos)
     {
-        Vector3Int cellPos = BuildingSystem.instance.gridLayout.LocalToCell(GetLocalPosOfMouse());
-        area.position = cellPos;
+        gridMap.SetBuildableOfTiles(objectPos, GetAreaEnd(objectPos), true);
+        gridMap.SetBuildableOfTiles(mouseCellPos, GetAreaEnd(mouseCellPos), false);
+        GridMapDisplayer.Instance.SyncGridToTilemap();
     }
-    private Vector3Int GetCellPosOfMouse()
+    private async UniTask MoveToPosition(Vector2Int cellPos)
     {
-        Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3Int cellPos = BuildingSystem.instance.gridLayout.WorldToCell(pos);
-        return cellPos;
+        Vector3 targetPos = gridMap
+         .GetTile(cellPos.x, cellPos.y)
+         .GetPositionOnTilemap(GridMapDisplayer.Instance.GetTilemap());
+
+        await transform.DOMove(targetPos, 0.25f)
+        .ToUniTask()
+        .AttachExternalCancellation(destroyCancellationToken);
     }
-    private Vector3 GetLocalPosOfMouse()
+    private bool CanMoveToPosition(Vector2Int targetPos)
     {
-        Vector3 cellPos = GetCellPosOfMouse();
-        Vector3 localPos = BuildingSystem.instance.gridLayout.CellToLocalInterpolated(cellPos);
-        return localPos;
+        Vector2Int objectPos = GetCellPositionOfGameObject();
+        bool canMoveWithoutDelete = gridMap.CanTakeArea(targetPos, GetAreaEnd(targetPos));
+        gridMap.SetBuildableOfTiles(objectPos, GetAreaEnd(objectPos), true);
+        bool canMoveWithDelete = gridMap.CanTakeArea(targetPos, GetAreaEnd(targetPos));
+        gridMap.SetBuildableOfTiles(objectPos, GetAreaEnd(objectPos), false);
+        return canMoveWithDelete || canMoveWithoutDelete;
     }
-    private BoundsInt GetAreaOfMouse()
+
+    private Vector2Int GetCellPositionOfGameObject()
     {
-        BoundsInt areaToPlace = area;
-        areaToPlace.position = GetCellPosOfMouse();
-        return areaToPlace;
-    }
-    private void SetTemporaryArea(bool canTakeArea)
-    {
-        if (canTakeArea)
-        {
-            tempArea = GetAreaOfMouse();
-            BuildingSystem.instance.TakeArea(tempArea, true);
-        }
-    }
-    private void ClearTemporaryArea()
-    {
-        BuildingSystem.instance.ClearArea(tempArea, true);
-        tempArea = new BoundsInt();
-    }
-    private void OnPlaceCancelCallBack()
-    {
-        if (!placed)
-            Destroy(gameObject);
+        Vector2 pos = transform.position;
+        return new Vector2Int(tilemap.WorldToCell(pos).x, tilemap.WorldToCell(pos).y);
     }
     private void Place()
     {
-        ClearTemporaryArea();
-        if (BuildingSystem.instance.CanTakeArea(GetAreaOfMouse()))
-        {
-            placeableObjectDataHandler.SetSaveData(this);
-            placeableObjectDataHandler.SetDataPosition(GetCellPosOfMouse());
-            BuildingSystem.instance.TakeArea(GetAreaOfMouse(), canWalkThrough);
-            placed = true;
-            SetAreaPositionToCurrentCellPosOfMouse();
-            spriteRenderer.color = Color.white;
-            SaveManager.Instance.Save().Forget();
-            BuildingSystem.onPlace?.Invoke();
-        }
-    }
-    private void Replace()
-    {
-        BuildingSystem.instance.ClearArea(area, canWalkThrough);
-        replaceItemMenu.Switch();
-        UniTask.Void(async () =>
-        {
-            await UniTask.DelayFrame(1);
-            placed = false;
-            BuildingSystem.onReplace?.Invoke();
-        });
+        placed = true;
+        SaveManager.Instance.Save().Forget();
     }
     private void Remove()
     {
-        placeableObjectDataHandler.Remove();
-        BuildingSystem.instance.ClearArea(area, canWalkThrough);
-        ClearTemporaryArea();
+        Vector2Int objectPos = GetCellPositionOfGameObject();
+        gridMap.SetBuildableOfTiles(objectPos, GetAreaEnd(objectPos), true);
+        GridMapDisplayer.Instance.SyncGridToTilemap();
         Destroy(gameObject);
         SaveManager.Instance.Save().Forget();
     }
-    #endregion
+}
+public static class TilemapExtensions
+{
+    public static Vector2Int GetCellPositionOfMouse(this Tilemap tilemap)
+    {
+        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        return new Vector2Int(tilemap.WorldToCell(mousePos).x, tilemap.WorldToCell(mousePos).y);
+    }
 }
