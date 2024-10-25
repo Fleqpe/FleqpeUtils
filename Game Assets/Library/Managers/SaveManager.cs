@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using System.Globalization;
 using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
+using System.Globalization;
 [DefaultExecutionOrder(0)]
 public class SaveManager : PersistentSingletonManager<SaveManager>
 {
