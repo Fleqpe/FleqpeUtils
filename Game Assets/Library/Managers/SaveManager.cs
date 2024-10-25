@@ -50,6 +50,7 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
                   Save().Forget();
       }
 }
+
 [Serializable]
 public class PolymorphicSaveDatas<T> : ISerializationCallbackReceiver
 {
@@ -57,6 +58,18 @@ public class PolymorphicSaveDatas<T> : ISerializationCallbackReceiver
       public List<ObjectWithType> objectWithTypes = new List<ObjectWithType>();
       public void OnAfterDeserialize()
       {
+            instances.Clear();
+            objectWithTypes.ForEach(objectWithType =>
+              {
+                    Type type = Type.GetType(objectWithType.type);
+                    T tempInstance = (T)Activator.CreateInstance(type);
+                    JsonUtility.FromJsonOverwrite(objectWithType.data, tempInstance);
+                    instances.Add(tempInstance);
+              });
+      }
+      public void OnBeforeSerialize()
+      {
+            objectWithTypes.Clear();
             instances.ForEach(instance =>
              {
                    objectWithTypes.Add(new ObjectWithType()
@@ -65,14 +78,6 @@ public class PolymorphicSaveDatas<T> : ISerializationCallbackReceiver
                          type = instance.GetType().ToString()
                    });
              });
-      }
-      public void OnBeforeSerialize()
-      {
-            objectWithTypes.ForEach(objectWithType =>
-              {
-                    Type type = Type.GetType(objectWithType.type);
-                    instances.Add((T)JsonUtility.FromJson(objectWithType.data, type));
-              });
       }
 }
 [Serializable]
