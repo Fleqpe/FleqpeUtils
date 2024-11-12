@@ -9,7 +9,7 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
 {
       public static GameFiles gameFiles { get { return Instance._gameFiles; } }
       [SerializeField] private float saveInterval;
-      [SerializeField] private GameFiles _gameFiles = new GameFiles();
+      [SerializeField] private GameFiles _gameFiles;
       [SerializeField] private bool isSaving = false;
       void Awake()
       {
@@ -43,6 +43,7 @@ public class SaveManager : PersistentSingletonManager<SaveManager>
       }
       private void Load()
       {
+            _gameFiles = new GameFiles();
             string loadString = PlayerPrefs.GetString("Save", "null");
             if (loadString != "null")
                   JsonUtility.FromJsonOverwrite(loadString, _gameFiles);
